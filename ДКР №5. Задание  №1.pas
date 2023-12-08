@@ -47,4 +47,6 @@ begin
     write(f2, a[i], ' ');
 
   close(f2);
+  
+  writeln('Сортировка прошла успешно! Результат записан в файл outpopit.txt!')
 end.
