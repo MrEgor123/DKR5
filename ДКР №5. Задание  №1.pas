@@ -8,22 +8,32 @@ var
   i, n: Integer;
   a: arr;
 
-procedure sortselect(var a: arr; n: Integer); // упорядочивание элементов массива
+procedure sortselect(var a: arr; n: Integer; ascending: Boolean); // упорядочивание элементов массива
 var
-  i, j, maxIndex, k: Integer;
+  i, j, index, k: Integer;
 begin
   for i := 1 to n - 1 do
   begin
-    maxIndex := i;
+    index := i;
     for j := i + 1 to n do
-      if a[j] > a[maxIndex] then // макс. эл. в неотсорт. части массива
-        maxIndex := j;
+    begin
+      if ascending then
+      begin
+        if a[j] < a[index] then
+          index := j;
+      end
+      else
+      begin
+        if a[j] > a[index] then
+          index := j;
+      end;
+    end;
 
-    if maxIndex <> i then // обмен местами текущего с максимальным
+    if index <> i then
     begin
       k := a[i];
-      a[i] := a[maxIndex];
-      a[maxIndex] := k;
+      a[i] := a[index];
+      a[index] := k;
     end;
   end;
 end;
@@ -38,7 +48,23 @@ begin
 
   close(f1);
 
-  sortselect(a, n); // процедура сортировки
+  writeln('Выберите порядок сортировки:');
+  writeln('1. По возрастанию');
+  writeln('2. По убыванию');
+  write('Введите номер: ');
+
+  var choice: Integer;
+  readln(choice);
+
+  case choice of
+    1: sortselect(a, n, True); // сортировка по возрастанию
+    2: sortselect(a, n, False); // сортировка по убыванию
+  else
+    begin
+      writeln('Некорректный выбор.');
+      Halt;
+    end;
+  end;
 
   assign(f2, 'outpopit.txt'); // открытие файла с результатом
   rewrite(f2);
@@ -48,5 +74,5 @@ begin
 
   close(f2);
   
-  writeln('Сортировка прошла успешно! Результат записан в файл outpopit.txt!')
+  writeln('Сортировка прошла успешно! Результат записан в файл outpopit.txt!');
 end.
