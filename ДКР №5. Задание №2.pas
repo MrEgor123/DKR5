@@ -1,99 +1,69 @@
-﻿program DKR5;
+Program DKR5;
+const
+  Sz = 100;
+  K = 4;
 
-type
-  TKey = Integer; // тип ключа для сортировки (замените на нужный вам)
-
-  // Определение функции-компаратора
-  TComparator = function(a, b: TKey): Boolean;
-
-procedure RadixSort(var A: array of TKey; n: Integer; Comparator: TComparator);
 var
-  i, j, maxNum, exp, divisor: Integer;
-  buckets: array[0..9] of array of TKey;
+  a, b: array[0..Sz] of Integer;
+  c: array[0..15] of Integer;
+  m, n, i, t: Integer;
+  e: Integer;
+  inputFile, outputFile: Text;
+
+procedure RadixSort(i: integer);
 begin
-  maxNum := A[0];
-  for i := 1 to n - 1 do
-    if A[i] > maxNum then
-      maxNum := A[i];
-
-  exp := 1;
-  while maxNum div exp > 0 do
+  while m > 0 do
   begin
-    // Инициализация корзин
-    for i := 0 to 9 do
-      SetLength(buckets[i], 0);
+    for i := Low(c) to High(c) do
+      c[i] := 0;
 
-    // Распределение элементов по корзинам
     for i := 0 to n - 1 do
     begin
-      j := (A[i] div exp) mod 10;
-      SetLength(buckets[j], Length(buckets[j]) + 1);
-      buckets[j][High(buckets[j])] := A[i];
+      t := a[i] div (1 * (2 shl e)) and 15; 
+      Inc(c[t]);
     end;
 
-    // Сборка элементов из корзин
-    i := 0;
-    for j := 0 to 9 do
+    for i := 1 to 15 do
+      Inc(c[i], c[i - 1]);
+
+    for i := n - 1 downto 0 do
     begin
-      while Length(buckets[j]) > 0 do
-      begin
-        A[i] := buckets[j][0];
-        SetLength(buckets[j], Length(buckets[j]) - 1);
-        i := i + 1;
-      end;
+      t := a[i] div (1 * (2 shl e)) and 15; 
+      Dec(c[t]);
+      b[c[t]] := a[i];
     end;
 
-    exp := exp * 10;
+    for i := 0 to n - 1 do
+      a[i] := b[i];
+
+    Inc(e, K);
+    m := m div (1 * (2 shl K)); 
   end;
 end;
 
-// Пример компаратора: сортировка по возрастанию
-function CompareAsc(a, b: TKey): Boolean;
 begin
-  Result := a > b;
-end;
+  Assign(inputFile, 'rawr.txt');
+  Reset(inputFile);
+  Read(inputFile, n);
+  Read(inputFile, m);
+  a[0] := m;
+  for i := 1 to n - 1 do
+  begin
+    Read(inputFile, a[i]);
+    if m < a[i] then
+      m := a[i];
+  end;
+  Close(inputFile);
 
-// Пример компаратора: сортировка по убыванию
-function CompareDesc(a, b: TKey): Boolean;
-begin
-  Result := a < b;
-end;
+  e := 0;
+  RadixSort(i);
 
-var
-  InputFileName, OutputFileName: String;
-  InputFile, OutputFile: TextFile;
-  Data: array of TKey;
-  i, n: Integer;
-
-begin
-  InputFileName := 'rawr.txt';
-  OutputFileName := 'outrawr.txt';
-  
-
-  // Открываем файлы
-  AssignFile(InputFile, InputFileName);
-  Reset(InputFile);
-  AssignFile(OutputFile, OutputFileName);
-  Rewrite(OutputFile);
-
-  // Считываем данные из файла
-  Readln(InputFile, n);
-  SetLength(Data, n);
+  Assign(outputFile, 'outrawr.txt');
+  Rewrite(outputFile);
   for i := 0 to n - 1 do
-    Read(InputFile, Data[i]);
+    Write(outputFile, a[i], ' ');
+  WriteLn(outputFile);
+  Close(outputFile);
 
-  // Выбор компаратора (раскомментируйте нужную строку)
-  RadixSort(Data, n, CompareAsc); // по возрастанию
-  //RadixSort(Data, n, CompareDesc); // по убыванию
-
-  // Выводим отсортированные данные в файл
-  Writeln(OutputFile, n);
-  for i := 0 to n - 1 do
-    Write(OutputFile, Data[i], ' ');
-
-  // Закрываем файлы
-  CloseFile(InputFile);
-  CloseFile(OutputFile);
-
-  writeln('Сортировка завершена. Результат записан в файл ', OutputFileName);
+  Writeln('Результат успешно сохранен в файл outrawr.txt');
 end.
